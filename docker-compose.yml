@@ -1,10 +1,9 @@
-version: "3.8"
-
 services:
   mariadb:
     image: mariadb:latest
     container_name: mariadb
     restart: always
+    env_file: .env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -12,25 +11,22 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
-      - app-network
+      - backend
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
     restart: always
-    environment:
-      PMA_HOST: mariadb
-      PMA_USER: ${MYSQL_USER}
-      PMA_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "${PMA_PORT}:80"
     depends_on:
       - mariadb
+    ports:
+      - "${PMA_PORT}:80"
+    environment:
+      PMA_HOST: mariadb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
-      - app-network
+      - backend
 
   redis:
     image: redis:latest
@@ -41,12 +37,12 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - app-network
+      - backend
 
 volumes:
   mariadb_data:
   redis_data:
 
 networks:
-  app-network:
+  backend:
     driver: bridge
